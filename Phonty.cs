@@ -52,7 +52,14 @@ namespace PhontyPlus
             var recordsFolder = Directory.GetFiles(Path.Combine(AssetLoader.GetModPath(Mod.Instance), "phonty_records"));
             foreach (var path in recordsFolder)
             {
-                records.Add(ObjectCreators.CreateSoundObject(AssetLoader.AudioClipFromFile(path), "* Phonograph Music *", SoundType.Voice, Color.yellow));
+                try { 
+                    records.Add(ObjectCreators.CreateSoundObject(AssetLoader.AudioClipFromFile(path), "* Phonograph Music *", SoundType.Voice, Color.yellow)); 
+                } 
+                catch (NotImplementedException e)
+                {
+                    var filename = Path.GetFileName(path);
+                    WarningScreenPatch.Show($"\n\nOnly audio file types are allowed in <color=blue>phonty_records</color>.\n\nPlease remove <color=red>phonty_records/{filename}</color>.");
+                }
             }
         }
 
