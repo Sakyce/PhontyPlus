@@ -12,6 +12,7 @@ using System.Text;
 using TMPro;
 using UnityEngine;
 using UnityEngine.Audio;
+using UnityEngine.UI;
 
 namespace PhontyPlus
 {
@@ -36,6 +37,7 @@ namespace PhontyPlus
         public static void LoadAssets() {
             var PIXELS_PER_UNIT = 26f;
             sprites.Add("idle_forward",AssetLoader.SpriteFromTexture2D(AssetLoader.TextureFromMod(Mod.Instance, "idle_forward.png"), PIXELS_PER_UNIT));
+            audios.Add("angryIntro", ObjectCreators.CreateSoundObject(AssetLoader.AudioClipFromMod(Mod.Instance, "PhontyIntro.ogg"), "Start remembering what you hear.", SoundType.Voice, Color.yellow));
             audios.Add("angry", ObjectCreators.CreateSoundObject(AssetLoader.AudioClipFromMod(Mod.Instance, "PhontyAngry.ogg"), "* Angry Phonograph *", SoundType.Voice, Color.yellow));
             audios.Add("shockwave", ObjectCreators.CreateSoundObject(AssetLoader.AudioClipFromMod(Mod.Instance, "PhontyShot.ogg"), "", SoundType.Effect, Color.yellow));
 
@@ -88,7 +90,7 @@ namespace PhontyPlus
         public void EndGame(Transform player)
         {
             var core = Singleton<CoreGameManager>.Instance;
-            if (PhontyMenu.nonLethalConfig.Value == true)
+            if (PhontyMenu.nonLethalConfig.Value == true || CoreGameManager.Instance.currentMode == Mode.Free)
             {
                 core.audMan.PlaySingle(audios.Get<SoundObject>("shockwave"));
                 behaviorStateMachine.ChangeState(new Phonty_Dead(this));
@@ -111,7 +113,8 @@ namespace PhontyPlus
         {
             base.Initialize();
             animator.animations.Add("Idle", new CustomAnimation<Sprite>(new Sprite[] { Phonty.sprites.Get<Sprite>("idle_forward") }, 1f));
-            animator.animations.Add("Chase", new CustomAnimation<Sprite>(chaseFrames.ToArray(), 1f));
+            animator.animations.Add("Chase", new CustomAnimation<Sprite>(chaseFrames.ToArray(), 0.5f));
+            animator.animations.Add("ChaseStatic", new CustomAnimation<Sprite>(new Sprite[] { emergeFrames.Last() }, 1f));
             animator.animations.Add("Emerge", new CustomAnimation<Sprite>(emergeFrames.ToArray(), 1f));
             animator.SetDefaultAnimation("Idle", 1f);
 
@@ -131,8 +134,8 @@ namespace PhontyPlus
             mapIcon.gameObject.SetActive(true);
 
             behaviorStateMachine.ChangeState(new Phonty_PlayingMusic(this));
-            navigator.SetSpeed(4f);
-            navigator.maxSpeed = 20f;
+            navigator.SetSpeed(0f);
+            navigator.maxSpeed = 0f;
             navigator.Entity.SetHeight(7f);
             gameObject.layer = LayerMask.NameToLayer("ClickableEntities");
 
@@ -215,11 +218,12 @@ namespace PhontyPlus
             phonty.mapIcon.gameObject.SetActive(false);
 
             phonty.audMan.FlushQueue(true);
-            phonty.audMan.QueueAudio(Phonty.audios.Get<SoundObject>("angry"), true);
-            phonty.audMan.SetLoop(true);
+            phonty.audMan.QueueAudio(Phonty.audios.Get<SoundObject>("angryIntro"), true);
 
+            phonty.StartCoroutine(Emerge());
             phonty.animator.Play("Emerge", 1f);
-            phonty.animator.SetDefaultAnimation("Chase", 1f);
+            phonty.animator.SetDefaultAnimation("ChaseStatic", 1f);
+
         }
         public override void DestinationEmpty()
         {
@@ -242,6 +246,18 @@ namespace PhontyPlus
             {
                 phonty.EndGame(other.transform);
             }
+        }
+
+        private IEnumerator Emerge()
+        {
+            while (phonty.audMan.QueuedAudioIsPlaying)
+                yield return null;
+            phonty.audMan.QueueAudio(Phonty.audios.Get<SoundObject>("angry"), true);
+            phonty.audMan.SetLoop(true);
+            phonty.animator.SetDefaultAnimation("Chase", 1f);
+            phonty.Navigator.SetSpeed(4f);
+            phonty.Navigator.maxSpeed = 20f;
+            yield break;
         }
     }
     public class Phonty_Dead : Phonty_StateBase
