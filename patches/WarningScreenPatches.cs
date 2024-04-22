@@ -7,11 +7,13 @@ using UnityEngine.SceneManagement;
 namespace PhontyPlus
 {
 	[HarmonyPatch(typeof(WarningScreen), nameof(WarningScreen.Advance))]
-	public static class PreventWarningScreenAdvancePatch
+	[HarmonyPriority(Priority.Last)]
+    public static class PreventWarningScreenAdvancePatch
 	{
 		public static bool Prefix(WarningScreen __instance) => !WarningScreenPatch.active;
 	}
 	[HarmonyPatch(typeof(WarningScreen), nameof(WarningScreen.Start))]
+	[HarmonyPriority(Priority.Last)]
 	public static class WarningScreenPatch
 	{
 		public static string forceText = null;
