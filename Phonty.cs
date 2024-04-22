@@ -34,6 +34,7 @@ namespace PhontyPlus
         public NoLateIcon mapIcon;
 
         public bool angry = false;
+        private bool deafPlayer = false;
         public static void LoadAssets() {
             var PIXELS_PER_UNIT = 26f;
             sprites.Add("idle_forward",AssetLoader.SpriteFromTexture2D(AssetLoader.TextureFromMod(Mod.Instance, "idle_forward.png"), PIXELS_PER_UNIT));
@@ -85,6 +86,7 @@ namespace PhontyPlus
             yield return new WaitForSeconds(0.5f);
             AudioListener.volume = 0.01f;
             Mod.assetManager.Get<AudioMixer>("Mixer").SetFloat("EchoWetMix", 1f);
+            deafPlayer = true;
             yield break;
         }
         public void EndGame(Transform player)
@@ -146,6 +148,12 @@ namespace PhontyPlus
             {
                 this.ec.map.Find(startingRoom.TileAtIndex(i).position.x, startingRoom.TileAtIndex(i).position.z, startingRoom.TileAtIndex(i).ConstBin, startingRoom);
             }
+        }
+
+        public override void VirtualUpdate()
+        {
+            if (deafPlayer && AudioListener.volume > 0.01f)
+                AudioListener.volume = 0.01f;
         }
 
         public void ResetTimer()
