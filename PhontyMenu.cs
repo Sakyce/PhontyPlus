@@ -1,6 +1,5 @@
 ﻿using BepInEx.Configuration;
 using MTM101BaldAPI.OptionsAPI;
-using System;
 using UnityEngine;
 
 namespace PhontyPlus

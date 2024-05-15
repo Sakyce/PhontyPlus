@@ -1,18 +1,14 @@
 ﻿using MTM101BaldAPI;
 using MTM101BaldAPI.AssetTools;
 using MTM101BaldAPI.Components;
-using Rewired;
-using Steamworks;
 using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Text;
 using TMPro;
 using UnityEngine;
 using UnityEngine.Audio;
-using UnityEngine.UI;
 
 namespace PhontyPlus
 {
@@ -20,7 +16,7 @@ namespace PhontyPlus
     {
         public static AssetManager sprites = new AssetManager();
         public static List<SoundObject> records = new List<SoundObject>();
-        public static AssetManager audios    = new AssetManager();
+        public static AssetManager audios = new AssetManager();
 
         public static List<Sprite> emergeFrames = new List<Sprite>();
         public static List<Sprite> chaseFrames = new List<Sprite>();
@@ -34,16 +30,17 @@ namespace PhontyPlus
         public NoLateIcon mapIcon;
 
         public bool angry = false;
-        public static void LoadAssets() {
+        public static void LoadAssets()
+        {
             var PIXELS_PER_UNIT = 26f;
-            sprites.Add("idle_forward",AssetLoader.SpriteFromTexture2D(AssetLoader.TextureFromMod(Mod.Instance, "idle_forward.png"), PIXELS_PER_UNIT));
+            sprites.Add("idle_forward", AssetLoader.SpriteFromTexture2D(AssetLoader.TextureFromMod(Mod.Instance, "idle_forward.png"), PIXELS_PER_UNIT));
             audios.Add("angryIntro", ObjectCreators.CreateSoundObject(AssetLoader.AudioClipFromMod(Mod.Instance, "PhontyIntro.ogg"), "Start remembering what you hear.", SoundType.Voice, Color.yellow));
             audios.Add("angry", ObjectCreators.CreateSoundObject(AssetLoader.AudioClipFromMod(Mod.Instance, "PhontyAngry.ogg"), "* Angry Phonograph *", SoundType.Voice, Color.yellow));
             audios.Add("shockwave", ObjectCreators.CreateSoundObject(AssetLoader.AudioClipFromMod(Mod.Instance, "PhontyShot.ogg"), "", SoundType.Effect, Color.yellow));
 
             for (int i = 0; i <= 37; i++)
             {
-                emergeFrames.Add(AssetLoader.SpriteFromTexture2D(AssetLoader.TextureFromMod(Mod.Instance, "emerge/frame_"+i+".png"), PIXELS_PER_UNIT));
+                emergeFrames.Add(AssetLoader.SpriteFromTexture2D(AssetLoader.TextureFromMod(Mod.Instance, "emerge/frame_" + i + ".png"), PIXELS_PER_UNIT));
             }
 
             for (int i = 0; i <= 19; i++)
@@ -54,10 +51,11 @@ namespace PhontyPlus
             var recordsFolder = Directory.GetFiles(Path.Combine(AssetLoader.GetModPath(Mod.Instance), "phonty_records"));
             foreach (var path in recordsFolder)
             {
-                try { 
-                    records.Add(ObjectCreators.CreateSoundObject(AssetLoader.AudioClipFromFile(path), "* Phonograph Music *", SoundType.Voice, Color.yellow)); 
-                } 
-                catch (NotImplementedException e)
+                try
+                {
+                    records.Add(ObjectCreators.CreateSoundObject(AssetLoader.AudioClipFromFile(path), "* Phonograph Music *", SoundType.Voice, Color.yellow));
+                }
+                catch (NotImplementedException)
                 {
                     var filename = Path.GetFileName(path);
                     WarningScreenPatch.Show($"\n\nOnly audio file types are allowed in <color=blue>phonty_records</color>.\n\nPlease remove <color=red>phonty_records/{filename}</color>.");
@@ -69,9 +67,9 @@ namespace PhontyPlus
 
         public bool ClickableRequiresNormalHeight() => false;
 
-        public void ClickableSighted(int player) {}
+        public void ClickableSighted(int player) { }
 
-        public void ClickableUnsighted(int player) {}
+        public void ClickableUnsighted(int player) { }
 
         public void Clicked(int player)
         {
@@ -121,7 +119,7 @@ namespace PhontyPlus
             // Counter on top of Phonty
             var totalBase = GameObject.Instantiate(Mod.assetManager.Get<GameObject>("TotalBase"));
             totalBase.transform.parent = transform;
-            totalBase.transform.localPosition = new Vector3(0,3,0);
+            totalBase.transform.localPosition = new Vector3(0, 3, 0);
             totalBase.transform.localScale = new Vector3(0.7f, 0.7f, 0.7f);
             totalBase.SetActive(true);
             totalDisplay = totalBase.gameObject.transform.GetChild(0).gameObject;
@@ -153,7 +151,8 @@ namespace PhontyPlus
             behaviorStateMachine.ChangeState(new Phonty_PlayingMusic(this));
         }
 
-        public void UpdateCounter(int count) {
+        public void UpdateCounter(int count)
+        {
             counter.SetText(string.Join("", count.ToString().Select(ch => "<sprite=" + ch + ">")));
             mapIcon.timeText.SetText(count.ToString());
             mapIcon.UpdatePosition(ec.map);
@@ -171,7 +170,7 @@ namespace PhontyPlus
     }
     public class Phonty_PlayingMusic : Phonty_StateBase
     {
-        public Phonty_PlayingMusic(Phonty phonty) : base(phonty) {}
+        public Phonty_PlayingMusic(Phonty phonty) : base(phonty) { }
         public override void Enter()
         {
             base.Enter();
@@ -192,7 +191,8 @@ namespace PhontyPlus
             {
                 phonty.behaviorStateMachine.ChangeState(new Phonty_Chase(phonty));
             }
-            else {
+            else
+            {
                 timeLeft -= Time.deltaTime * phonty.ec.NpcTimeScale;
             }
             phonty.UpdateCounter((int)timeLeft);

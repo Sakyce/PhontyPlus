@@ -1,12 +1,4 @@
-﻿using HarmonyLib;
-using PhontyPlus.utils;
-using System;
-using System.Collections;
-using System.Collections.Generic;
-using System.Text;
-using UnityEngine;
-
-namespace PhontyPlus.patches
+﻿namespace PhontyPlus.patches
 {
 #if DEBUG
 
